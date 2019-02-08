@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Home</title>
+        <link rel="stylesheet" type="text/css"  href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css">
+        <link rel="stylesheet" type="text/css"  href="stylesheets/style.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJW4jsPlNKgv6jFm3B5Edp5ywgdqLWdmc&sensor=false async defer"></script>
+	</head>
+    <script>
+		homeModule = angular.module('home',[]);
+		homeModule.controller('searchController',function($scope,$http){
+			$scope.searchitems= function(key){
+				sessionStorage.setItem('keyword',$scope.search);
+				location.href = '/search';
+			}
+		})
+	</script>
+	
+	<body ng-app = "home">
+        <!--=-------
+        Top
+    ------------>
+        <div id="nav" class="container-fluid">
+            <nav class="navbar navbar-custom">
+                <div class="container">
+					<div class="col-md-9">
+						<div class="navbar-header col-md-2 logo">
+							<h1><a class="navbar-brand" href="/"><span>Buy</span>shop</a></h1>
+						</div>
+						<div>
+						<ul class="col-md-7 nav navbar-nav menu">
+							<li class="active grid nav-item nav-link"><a class="color1" href="/products">Products</a></li>				
+							<li class="active grid nav-item nav-link"><a class="color2" href="/login"><span class="glyphicon glyphicon-user"></span> LOGIN | SIGNUP</a></li>
+							<li class="active grid nav-item nav-link"><a class="color3" href="/profile">My Account</a></li>
+							<li class="active grid nav-item nav-link"><a class="color4" href="/cart"><span class="glyphicon glyphicon-shopping-cart"></span> Cart</a></li>
+						</ul>
+						</div>
+					</div>
+					<form class="col-md-3 search" ng-controller = "searchController">
+						<input type="text" name="s" class="textbox" placeholder="search products" ng-model = "search" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'Search';}">
+						<input type="submit" value="Subscribe" id="submit" name="submit" ng-click = "searchitems()">
+					</form>
+					<div class="clearfix"></div>
+				</div>
+            </nav>
+			<div class="clearfix"></div>
+        </div>
+	
+	
+ <!------------------
+        banner
+  -------------------->
+	<div id="banner">
+		<div class="container">
+			<div class="banner_desc">
+				<h1>New Season Arrivals.</h1>
+				<h2>Check out all the new trends</h2>
+				<div class="goto-btn">
+					<a href="#">Shop Now</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+ <!------------------
+        content
+  -------------------->		
+<!-- products -->
+	<div id="products">
+		<div class="container">
+			<div class="products-heading">
+				<h3>POPULAR PRODUCTS</h3>
+			</div>
+			<div class="products-grids">
+				<div class="col-md-3 product-left-grid">
+					<div class="product-grid">
+						<div class="product-grid-text">
+							<a href="single.html"><img src="images/t1.jpg" alt="" /></a>
+							<div class="products-grid-info">
+								<h3>Nike g87</h3>
+								<h4>Training Tank Top</h4>
+								<p>The Nike Tailwind Loose Women's Running Tank 
+									Top is made with sweat-wicking fabric to help you 
+									stay dry and comfortable on your run.
+								</p>
+								<div class="price">
+									<p>$ 49.99</p>
+								</div>
+								<div class="like">
+									<a href="#"><img src="images/like.png" alt="" /></a>
+								</div>
+								<div class="clearfix"> </div>
+							</div>
+							<div class="plus">
+								<a href="single.html"><img src="images/plus.png" alt="" /></a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 product-left-grid">
+					<div class="product-grid">
+						<div class="product-grid-text">
+							<a href="single.html"><img src="images/t2.jpg" alt="" /></a>
+							<div class="products-grid-info">
+								<h3>Nike g87</h3>
+								<h4>Training Tank Top</h4>
+								<p>The Nike Tailwind Loose Women's Running Tank 
+									Top is made with sweat-wicking fabric to help you 
+									stay dry and comfortable on your run.
+								</p>
+								<div class="price">
+									<p>$ 49.99</p>
+								</div>
+								<div class="like">
+									<a href="#"><img src="images/like.png" alt="" /></a>
+								</div>
+								<div class="clearfix"> </div>
+							</div>
+							<div class="plus">
+								<a href="single.html"><img src="images/plus.png" alt="" /></a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 product-left-grid">
+					<div class="product-grid">
+						<div class="product-grid-text">
+							<a href="single.html"><img src="images/t3.jpg" alt="" /></a>
+							<div class="products-grid-info">
+								<h3>Nike I-Beam Swoosh</h3>
+								<h4>Sports Top</h4>
+								<p>The Nike Tailwind Loose Women's Running Tank 
+									Top is made with sweat-wicking fabric to help you 
+									stay dry and comfortable on your run.
+								</p>
+								<div class="price">
+									<p>$ 70.00</p>
+								</div>
+								<div class="like">
+									<a href="#"><img src="images/like.png" alt="" /></a>
+								</div>
+								<div class="clearfix"> </div>
+							</div>
+							<div class="plus">
+								<a href="single.html"><img src="images/plus.png" alt="" /></a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 product-left-grid">	
+					<div class="product-grid">
+						<div class="product-grid-text">
+							<a href="single.html"><img src="images/t6.jpg" alt="" /></a>
+							<div class="products-grid-info">
+								<h3>Nike lux</h3>
+								<h4>Running Top</h4>
+								<p>The Nike Tailwind Loose Women's Running Tank 
+									Top is made with sweat-wicking fabric to help you 
+									stay dry and comfortable on your run.
+								</p>
+								<div class="price">
+									<p>$ 28.49</p>
+								</div>
+								<div class="like">
+									<a href="#"><img src="images/like.png" alt="" /></a>
+								</div>
+								<div class="clearfix"> </div>
+							</div>
+							<div class="plus">
+								<a href="single.html"><img src="images/plus.png" alt="" /></a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="clearfix"> </div>
+			</div>
+		</div>
+		<!-- //container -->
+	</div>
+	<!-- // products -->
+ <!------------------
+        footer
+     -------------------->
+	 <script>
+function initialize()
+{
+    var mapProp = {
+        center:new google.maps.LatLng(40.4447451,-79.9611917),
+        zoom:15,
+        mapTypeId:google.maps.MapTypeId.ROADMAP
+    };
+    var map=new google.maps.Map(document.getElementById("googleMap"), mapProp);
+}
+ 
+	google.maps.event.addDomListener(window, 'load', initialize);
+	</script>
+	<div class="footer">
+		<div class="container">
+			<div class="footer_top">
+				<div class="col-md-3">
+					<h3>Our Stores</h3>
+					<address class="address">
+						<p>135 North Bellefield Avenue, <br>
+							Pittsburgh, PA 15260</p>
+						<dl>
+							<dt></dt>
+							<dd>phone:<span> +1(412)-254-2478</span></dd>
+							<dd>E-mail:&nbsp; <span>info(at)buyshop.com</span></dd>
+						</dl>
+					</address>
+					<ul class="footer_social">
+						<li><a href=""> <i class="fb"> </i> </a></li>
+						<li><a href=""><i class="tw"> </i> </a></li>
+						<li><a href=""><i class="google"> </i> </a></li>
+						<li><a href=""><i class="instagram"> </i> </a></li>
+					</ul>
+				</div>
+				<div id="googleMap" style="height:240px;" class ="col-md-6" ></div>
+				<div class="col-md-3">
+					<h3>Support</h3>
+					<ul class="list">
+						<li><a href="#">Terms & Conditions</a></li>
+						<li><a href="#">FAQ</a></li>
+						<li><a href="#">Services</a></li>
+						<li><a href="#">Track Order</a></li>
+						<li><a href="#">About Us</a></li>
+						<li><a href="#">Contact Us</a></li>
+					</ul>
+					<div class="clearfix"> </div>
+				</div>
+				<div class="clearfix"> </div>
+			</div>
+			<div class="footer_bottom">
+				<div class="copy">
+					<p>Copyright © 2018 Buy_shop. Pitt IS 2710 All Rights Reserved.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+    </body>
+</html>

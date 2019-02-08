@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>s_m_Profile</title>
+        <link rel="stylesheet" type="text/css"  href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css">
+        <link rel="stylesheet" type="text/css"  href="stylesheets/style.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+	</head>
+	<script>
+		admproductinfoModule = angular.module('admproductinfo',[]);
+		admproductinfoModule.controller('admproductinfoController',function($scope,$http){
+			
+			// find the store
+			if (!sessionStorage.getItem('admid')){
+				alert("Administrator status expired, Please login");
+				location.href = '/admlogin';
+			}else{
+				if (!sessionStorage.getItem('admproduct')){
+					alert("Product Info not found")
+					location.href = '/storehome';
+				}else{
+					$scope.curproduct = angular.fromJson(sessionStorage.getItem('admproduct'));
+					$scope.newkind = $scope.curproduct.kind;
+					$scope.newsize = $scope.curproduct.size;
+					$scope.newinventory = $scope.curproduct.inventory_amount;
+					$scope.newprice = $scope.curproduct.price;
+					$scope.newimg = $scope.curproduct.img;
+					$scope.newdescription = $scope.curproduct.description;
+				}
+			}
+			
+			$scope.saveinfo = function(){
+				var url = '/productctrl/updatebyid';
+				var config = {
+						headers : {
+							'Accept': 'application/json'
+							}
+					}
+					var data = {
+						product_ID: $scope.curproduct.product_ID,
+						store_ID: $scope.curproduct.store_ID,
+						productName: $scope.curproduct.productName,
+						kind:$scope.newkind,
+						size:$scope.newsize,
+						inventory_amount:$scope.newinventory,
+						price:$scope.newprice,
+						img:$scope.newimg,
+						description:$scope.newdescription
+					}
+					$http.post(url,JSON.stringify(data), config).then(function (response){
+						$scope.postMsg= response.data;
+					}, function (response){
+							$scope.postMsg = { 'Failed': true, 'message': "Error Status: " +  response.statusText};
+					}
+				);
+			}
+			
+			//Delete an product
+			$scope.removeproduct= function(productid,storeid){
+				if(confirm("You really want to delete this product?")){
+					var url = '/productctrl/deletebyid/?productid='+ productid+'&storeid='+ storeid;
+					$http.get(url).then(function (response){
+						$scope.postMsg= response.data;
+						if(!$scope.postMsg.Failed){
+							url = '/productctrl';
+							$http.get(url).then(function (response){
+								$scope.postMsg= response.data;
+								if(!$scope.postMsg.Failed){
+									$scope.products = $scope.postMsg;
+									$window.location.reload();
+								}
+							})
+						}
+					}, function (response){
+						$scope.postMsg = { 'Failed': true, 'message': "Error Status: " +  response.statusText};
+					});
+				}
+			}
+		})
+		
+		
+		//log out
+		admproductinfoModule.controller('logoutController',function($scope,$http){
+			$scope.logout= function(){
+				sessionStorage.removeItem('admid');
+				location.href = '/admlogin';
+			}
+		})
+	</script>
+    <body ng-app="admproductinfo">
+        <!--=-------
+        Navigation 
+        ------------>
+        <div id="nav" class="container-fluid" ng-controller="logoutController">
+                <nav class="navbar navbar-custom">
+                    <div class="container">
+                        <div>
+                            <div class="navbar-header col-md-2 admlogo">
+                                <h1><a class="adm-brand" href="/"><span>Buy</span>shop</a></h1>
+                            </div>
+							<div>
+                                <ul class="col-md-8 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color1" href="/storehome">Product Manage</a></li>
+                                    <li class="active grid nav-item nav-link"><a class="color2" href="/storeadmtransaction">Transaction Record</a></li>				
+                                    <li class="active grid nav-item nav-link"><a class="color3" href="/storeadmprofile">Manager Account</a></li>
+                                </ul>
+                                <ul class="col-md-2 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color4" ng-click="logout()">Logout</a></li>
+                                </ul>
+							</div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </nav>
+            </div>
+        <!--=-------
+        profile
+------------>
+        <div class = "container" ng-controller = "admproductinfoController">
+			<div class = "col-md-8 col-md-offset-2 profile-show">
+			    <div class="section-title text-center center">
+                    <div class = "tabletitle"><h2>Product Infomation</h2></div>
+                </div>
+				<form class="form-horizontal" name = "productInfo">
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Product Name:</span>
+                        <div class="col-sm-9">
+                            <p>{{curproduct.productName}}</p>
+                        </div>
+                    </div>
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Product kind:</span>
+                        <div class="col-sm-9">
+                            <input ng-model="newkind" class="form-control" />
+                        </div>
+                    </div>
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Product size:</span>
+                        <div class="col-sm-9">
+							<select type="text" ng-model="newsize" class="form-control">
+								<option value="xs">xs</option>
+								<option value="s">s</option>
+								<option value="m">m</option>
+								<option value="l">l</option>
+								<option value="xl">xl</option>
+							</select>
+                        </div>
+                    </div>
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Inventory Amount:</span>
+                        <div class="col-sm-9">
+                            <input ng-model="newinventory" type= "number" class="form-control" />
+                        </div>
+                    </div>
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Product Price:</span>
+                        <div class="col-sm-9">
+                            <input ng-model="newprice" type= "number" step="0.01" class="form-control" />
+                        </div>
+                    </div>
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Product Image:</span>
+                        <div class="col-sm-9">
+							<input ng-model="newimg" class="form-control" />
+                        </div>
+                    </div>
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Product Description:</span>
+                        <div class="col-sm-9">
+                            <textarea ng-model="newdescription" class="form-control"></textarea>
+                        </div>
+                    </div>
+					<div class="col-md-9 col-md-offset-3" ng-show = "postMsg.Failed">
+							<div class="alert alert-danger">{{postMsg.message}}</div>
+					</div>
+					<div class="form-group">
+                        <div class="col-md-3, col-md-offset-9 profile-btn-panel">
+                            <button type="submit" value="Save" class="btn btn-default" ng-click = "saveinfo()">Save</button>
+							<button value="delete" class="btn btn-default" ng-click = "removeproduct(curproduct.product_ID,curproduct.store_ID)">Delete</button>
+                        </div>
+                    </div>
+				</form>
+			</div>
+		</div>
+        <!------------------
+        footer
+     -------------------->
+                <div class="container">
+                    <div class="footer_bottom">
+                        <div class="copy">
+                            <p>Copyright © 2018 Buy_shop. Pitt IS 2710 All Rights Reserved.</p>
+                        </div>
+                    </div>
+                </div>
+    </body>
+</html>

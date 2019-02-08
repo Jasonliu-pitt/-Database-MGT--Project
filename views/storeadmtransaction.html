@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>s_m_transaction</title>
+        <link rel="stylesheet" type="text/css"  href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css">
+        <link rel="stylesheet" type="text/css"  href="stylesheets/style.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script>
+		transactionadmModule = angular.module('transactionadm',[]);
+		transactionadmModule.controller('transactionController',function($scope,$http){
+			
+			var url = '/transaction/Home';
+			$http.get(url).then(function (response){
+				$scope.postMsg= response.data;
+				if(!$scope.postMsg.Failed){
+					$scope.hometransactions = $scope.postMsg;
+				}
+			})
+			
+			url = '/transaction/Bussiness';
+			$http.get(url).then(function (response){
+				$scope.postMsg= response.data;
+				if(!$scope.postMsg.Failed){
+					$scope.Bussinesstransactions = $scope.postMsg;
+				}
+			})
+		})
+		
+		//log out
+		transactionadmModule.controller('logoutController',function($scope,$http){
+			$scope.logout= function(){
+				sessionStorage.removeItem('admid');
+				location.href = '/admlogin';
+			}
+		})
+</script>
+    </head>
+    <body ng-app="transactionadm">
+	<!--=-------
+        Top
+    ------------>
+        <div id="nav" class="container-fluid" ng-controller="logoutController">
+            <nav class="navbar navbar-custom">
+                <div class="container">
+					<div>
+						<div class="navbar-header col-md-2 admlogo">
+							<h1><a class="adm-brand" href="/"><span>Buy</span>shop</a></h1>
+						</div>
+						<div>
+                                <ul class="col-md-8 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color1" href="/storehome">Product Manage</a></li>
+                                    <li class="active grid nav-item nav-link"><a class="color2" href="/storeadmtransaction">Transaction Record</a></li>				
+                                    <li class="active grid nav-item nav-link"><a class="color3" href="/storeadmprofile">Manager Account</a></li>
+                                </ul>
+                                <ul class="col-md-2 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color4" ng-click="logout()">Logout</a></li>
+                                </ul>
+                        </div>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+            </nav>
+        </div>
+        <!--=-------
+        table
+------------>
+
+        <div class="col-md-10 col-md-offset-1 profile-show" ng-controller="transactionController">
+				<div class="section-title text-center center">
+                    <h2>Home User Transactions</h2>
+                </div>
+                <div class="storectrl">
+                        <div class="search">
+                                <input type="text" ng-model= "Homequery" name="s" class="textbox" placeholder="key word" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'product name';}">
+                                <input type="submit" value="Search" name="submit">
+								<div id="response"> </div>
+                        </div>
+                        <ul class="sort_nav">
+                                    <li>Sort : </li>
+                                    <li>Based on:</li> 
+                                    <li><select ng-model="homesortcol" ng-init= "homesortcol = 'transaction_date'">
+										   <option value="transaction_date">Time</option>
+										   <option value="quantity">Quantity</option>
+                                           <option value="price">Price</option>
+										   <option value="price*quantity">Total Price</option>
+                                        </select>
+                                    </li> |
+                                    <li>Order By:</li> 
+                                    <li><select ng-model="homesortord">
+                                           <option value="">low-to-high</option>
+                                           <option value="-">high-to-low</option>
+                                        </select>
+                                    </li>
+                                    <div class="clear"></div>	
+                         </ul>
+                         <div class="clearfix"></div>	
+                </div> 
+            <div id="class" align = "center" style="margin: 0cm 0cm 0pt; text-align: left">
+            <table class="table">
+				<thead>
+					<tr>
+						<th>
+							Order number
+						</th>
+						<th>
+                            Date
+						</th>
+						<th>
+                            User ID
+                        </th>
+						<th>
+                            Product ID
+						</th>
+						<th>
+                            Store ID
+                        </th>
+                        <th>
+							Price
+                        </th>
+                        <th>
+                            Quantity
+                        </th>
+                        <th>
+                            Total Price
+                        </th>
+					</tr>
+				</thead>
+				<tbody ng-repeat = "transaction in hometransactions | orderBy:homesortord + homesortcol | filter:Homequery">
+                    <tr>
+                            <td>
+                                {{$index+1}}
+                            </td>
+                            <td>
+                                {{transaction.transaction_date}}
+                            </td>
+							<td>
+                                {{transaction.user_ID}}
+                            </td>
+                            <td>
+                                {{transaction.product_ID}}
+                            </td>
+                            <td>
+                                {{transaction.store_ID}}
+                            </td>
+                            <td>
+                                {{transaction.price}}
+                            </td>
+                            <td>
+                                {{transaction.quantity}}
+                            </td>
+                            <td>
+                                {{transaction.price*transaction.quantity}}
+                            </td>
+                    </tr>
+				</tbody>
+            </table>
+            </div>
+			<div class="container noresult" ng-show = "hometransactions.length == 0">
+				<h3>No Home Transaction Information</h3>
+			</div>
+			<div class="section-title text-center center">
+                    <h2>Bussiness User Transactions</h2>
+                </div>
+                <div class="storectrl">
+                        <div class="search">
+                                <input type="text" ng-model= "Bussinessquery" name="s" class="textbox" placeholder="key word" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'product name';}">
+                                <input type="submit" value="Search" name="submit">
+								<div id="response"> </div>
+                        </div>
+                        <ul class="sort_nav">
+                                    <li>Sort : </li>
+                                    <li>Based on:</li> 
+                                    <li><select ng-model="Bussinesssortcol" ng-init= "Bussinesssortcol = 'transaction_date'">
+										   <option value="transaction_date">Time</option>
+										   <option value="quantity">Quantity</option>
+                                           <option value="price">Price</option>
+										   <option value="price*quantity">Total Price</option>
+                                        </select>
+                                    </li> |
+                                    <li>Order By:</li> 
+                                    <li><select ng-model="Bussinesssortord">
+                                           <option value="">low-to-high</option>
+                                           <option value="-">high-to-low</option>
+                                        </select>
+                                    </li>
+                                    <div class="clear"></div>	
+                         </ul>
+                         <div class="clearfix"></div>	
+                </div> 
+            <div id="class" align = "center" style="margin: 0cm 0cm 0pt; text-align: left">
+            <table class="table">
+				<thead>
+					<tr>
+						<th>
+							Order number
+						</th>
+						<th>
+                            Date
+						</th>
+						<th>
+                            User ID
+                        </th>
+						<th>
+                            Product ID
+						</th>
+						<th>
+                            Store ID
+                        </th>
+                        <th>
+							Price
+                        </th>
+                        <th>
+                            Quantity
+                        </th>
+                        <th>
+                            Total Price
+                        </th>
+					</tr>
+				</thead>
+				<tbody ng-repeat = "transaction in Bussinesstransactions | orderBy:Bussinesssortord + Bussinesssortcol| filter:Bussinessquery">
+                    <tr>
+                            <td>
+                                {{$index+1}}
+                            </td>
+                            <td>
+                                {{transaction.transaction_date}}
+                            </td>
+							<td>
+                                {{transaction.user_ID}}
+                            </td>
+                            <td>
+                                {{transaction.product_ID}}
+                            </td>
+                            <td>
+                                {{transaction.store_ID}}
+                            </td>
+                            <td>
+                                {{transaction.price}}
+                            </td>
+                            <td>
+                                {{transaction.quantity}}
+                            </td>
+                            <td>
+                                {{transaction.price*transaction.quantity}}
+                            </td>
+                    </tr>
+				</tbody>
+            </table>
+            </div>
+			<div class="container noresult" ng-show = "Bussinesstransactions.length == 0">
+				<h3>No Business Transaction Information</h3>
+			</div>
+		</div>
+	</div>
+    <!------------------
+        footer
+     -------------------->
+                <div class="container">
+                    <div class="footer_bottom">
+                        <div class="copy">
+                            <p>Copyright © 2018 Buy_shop. Pitt IS 2710 All Rights Reserved.</p>
+                        </div>
+                    </div>
+                </div>
+    </body>
+</html>

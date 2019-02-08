@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>s_m_homepage</title>
+        <link rel="stylesheet" type="text/css"  href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css">
+        <link rel="stylesheet" type="text/css"  href="stylesheets/style.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script>
+		regionadmModule = angular.module('regionadm',[]);
+		regionadmModule.controller('regionController',function($scope,$http,$window){
+		//get home profit
+			$http.get('/chart/home/orderproductsbyprofit').then(function (response){
+				$scope.homeprofits  = response.data;
+			})
+			
+			
+		//get business profit
+			$http.get('/chart/business/orderproductsbyprofit').then(function (response){
+				$scope.businessprofits  = response.data;
+			})
+	})
+	
+		regionadmModule.controller('logoutController',function($scope,$http){
+			$scope.logout= function(){
+				sessionStorage.removeItem('admid');
+				location.href = '/admlogin';
+			}
+		})
+</script>
+    </head>
+    <body ng-app="regionadm">
+	<!--=-------
+        Top
+    ------------>
+        <div id="nav" class="container-fluid" ng-controller="logoutController">
+            <nav class="navbar navbar-custom">
+                <div class="container">
+					<div>
+						<div class="navbar-header col-md-2 admlogo">
+							<h1><a class="adm-brand" href="/"><span>Buy</span>shop</a></h1>
+						</div>
+						<div>
+                                <ul class="col-md-8 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color1" href="/regionadmhome">Store Manage</a></li>
+									<li class="active grid nav-item nav-link"><a class="color2" href="/regionadmuser">User Manage</a></li>
+                                    <li class="active grid nav-item nav-link"><a class="color3" href="/regionadmchart">Chart</a></li>
+                                    <li class="active grid nav-item nav-link"><a class="color4" href="/regionadmtransaction">Transaction Record</a></li>				
+                                    <li class="active grid nav-item nav-link"><a class="color5" href="/regionadmprofile">Manager Account</a></li>
+                                </ul>
+                                <ul class="col-md-2 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color6" ng-click="logout()">Logout</a></li>
+                                </ul>
+                        </div>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+            </nav>
+        </div>
+        <!--=-------
+        table
+------------>
+            <div class="col-md-10 col-md-offset-1 column" ng-controller="regionController">
+                <div class="storectrl">
+                        <div class="search">
+                                <input type="text" ng-model= "homequery" name="s" class="textbox" placeholder="key word" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'product name';}">
+                                <input type="submit" value="Search" name="submit">
+								<div id="response"> </div>
+                        </div>
+                        <ul class="sort_nav">
+                                    <li>Sort : </li>
+                                    <li>Based on:</li> 
+                                    <li><select ng-model="homesortcol" ng-init= "homesortcol = 'profit'">
+										   <option value="product_ID">Product ID</option>
+										   <option value="profit">Profit</option>
+                                        </select>
+                                    </li> |
+                                    <li>Order By:</li> 
+                                    <li><select ng-model="homesortord" ng-init= "homesortord = '-'">
+                                           <option value="">low-to-high</option>
+                                           <option value="-">high-to-low</option>
+                                        </select>
+                                    </li>
+                                    <div class="clear"></div>	
+                         </ul>
+                         <div class="clearfix"></div>	
+                </div>            
+            <div class="allproducts" align = "center">
+				<div class = "tabletitle"><h2>Home Profit Infomation</h2></div>
+            <table class="table" ng-show = "homeprofits.length != 0">
+				<thead>
+					<tr>
+						<th>
+							Product ID
+						</th>
+						<th>
+                            Product Name
+						</th>
+						<th>
+							Profit
+						</th>
+					</tr>
+				</thead>
+				<tbody ng-repeat="homeprofit in homeprofits| orderBy:homesortord + homesortcol | filter:homequery">
+					<tr>
+						<td>
+							{{homeprofit.product_ID}}
+						</td>
+						<td>
+							{{homeprofit.productName}}
+						</td>
+						<td>
+							{{homeprofit.profit}}
+						</td>
+                    </tr>
+				</tbody>
+            </table>
+			<div class="container noresult" ng-show = "homeprofits.length == 0">
+				<h3>No Home transaction record</h3>
+			</div>
+            </div>
+			<div class="storectrl">
+                        <div class="search">
+                                <input type="text" ng-model= "businessquery" name="s" class="textbox" placeholder="key word" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'product name';}">
+                                <input type="submit" value="Search" name="submit">
+								<div id="response"> </div>
+                        </div>
+                        <ul class="sort_nav">
+                                    <li>Sort : </li>
+                                    <li>Based on:</li> 
+                                    <li><select ng-model="businesssortcol" ng-init= "businesssortcol = 'profit'">
+										   <option value="product_ID">Product ID</option>
+										   <option value="profit">Profit</option>
+                                        </select>
+                                    </li> |
+                                    <li>Order By:</li> 
+                                    <li><select ng-model="businesssortord" ng-init= "businesssortord = '-'">
+                                           <option value="">low-to-high</option>
+                                           <option value="-">high-to-low</option>
+                                        </select>
+                                    </li>
+                                    <div class="clear"></div>	
+                         </ul>
+                         <div class="clearfix"></div>	
+                </div>            
+            <div class="allproducts" align = "center">
+				<div class = "tabletitle"><h2>Business Profit Infomation</h2></div>
+            <table class="table" ng-show = "businessprofit.length != 0">
+				<thead>
+					<tr>
+						<th>
+							Product ID
+						</th>
+						<th>
+                            Product Name
+						</th>
+						<th>
+							Profit
+						</th>
+					</tr>
+				</thead>
+				<tbody ng-repeat="businessprofit in businessprofits| orderBy:businesssortord + businesssortcol | filter: businessquery">
+					<tr>
+						<td>
+							{{businessprofit.product_ID}}
+						</td>
+						<td>
+							{{businessprofit.productName}}
+						</td>
+						<td>
+							{{businessprofit.profit}}
+						</td>
+                    </tr>
+				</tbody>
+            </table>
+			<div class="container noresult" ng-show = "businessprofit.length == 0">
+				<h3>No Business transaction record</h3>
+			</div>
+            </div>
+    <!------------------
+        footer
+     -------------------->
+                <div class="footer">
+                    <div class="container">
+                        <div class="footer_bottom">
+                            <div class="copy">
+                                <p>Copyright © 2018 Buy_shop. Pitt IS 2710 All Rights Reserved.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </body>
+</html>

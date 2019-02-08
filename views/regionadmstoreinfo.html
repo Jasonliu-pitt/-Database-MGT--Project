@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>r_m_Profile</title>
+        <link rel="stylesheet" type="text/css"  href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css">
+        <link rel="stylesheet" type="text/css"  href="stylesheets/style.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+	</head>
+	<script>
+		admstoreinfoModule = angular.module('admstoreinfo',[]);
+		admstoreinfoModule.controller('admstoreinfoController',function($scope,$http){
+			
+			// find the store
+			if (!sessionStorage.getItem('admid')){
+				alert("Administrator status expired, Please login");
+				location.href = '/admlogin';
+			}else{
+				if (!sessionStorage.getItem('admstore')){
+					alert("Store Info not found")
+					location.href = '/regionadmhome';
+				}else{
+					$scope.curstore = angular.fromJson(sessionStorage.getItem('admstore'));
+					$scope.newname = $scope.curstore.Name;
+					$scope.newaddress = $scope.curstore.Address;
+					$scope.newmagname = $scope.curstore.storeManagerName;
+				}
+			}
+			
+			$scope.saveinfo = function(){
+				var url = '/administrator/updatestorebyid';
+				var config = {
+						headers : {
+							'Accept': 'application/json'
+							}
+					}
+					var data = {
+						storeid: $scope.curstore.store_ID,
+						name: $scope.newname,
+						address:$scope.newaddress,
+						storemagname:$scope.newmagname,
+					}
+					$http.post(url,JSON.stringify(data), config).then(function (response){
+						$scope.postMsg= response.data;
+					}, function (response){
+							$scope.postMsg = { 'Failed': true, 'message': "Error Status: " +  response.statusText};
+					}
+				);
+			}
+			
+			
+		//Delete an store
+			$scope.removestore= function(regionid,storeid){
+				if(confirm("You really want to delete this store?")){
+					var url = '/administrator/deletestorebyid/?storeid='+ storeid+'&regionid=' + regionid + '&admid=' + sessionStorage.getItem('admid');
+					$http.get(url).then(function (response){
+						$scope.postMsg= response.data;
+						if(!$scope.postMsg.Failed){
+							url = '/administrator/findstorebyregion/'+ sessionStorage.getItem('admid');
+							$http.get(url).then(function (response){
+								$scope.postMsg= response.data;
+								if(!$scope.postMsg.Failed){
+									$scope.products = $scope.postMsg;
+									location.href = '/regionadmhome';
+								}
+							})
+						}
+					}, function (response){
+						$scope.postMsg = { 'Failed': true, 'message': "Error Status: " +  response.statusText};
+					});
+				}
+			}
+			
+		})
+		
+		
+		//log out
+		admstoreinfoModule.controller('logoutController',function($scope,$http){
+			$scope.logout= function(){
+				sessionStorage.removeItem('admid');
+				location.href = '/admlogin';
+			}
+		})
+	</script>
+    <body ng-app="admstoreinfo">
+        <!--=-------
+        Navigation 
+        ------------>
+        <div id="nav" class="container-fluid" ng-controller="logoutController">
+                <nav class="navbar navbar-custom">
+                    <div class="container">
+                        <div>
+                            <div class="navbar-header col-md-2 admlogo">
+                                <h1><a class="adm-brand" href="/"><span>Buy</span>shop</a></h1>
+                            </div>
+                            <div>
+                                <ul class="col-md-8 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color1" href="/regionadmhome">Store Manage</a></li>
+									<li class="active grid nav-item nav-link"><a class="color2" href="/regionadmuser">User Manage</a></li>
+                                    <li class="active grid nav-item nav-link"><a class="color3" href="/regionadmchart">Chart</a></li>
+                                    <li class="active grid nav-item nav-link"><a class="color4" href="/regionadmtransaction">Transaction Record</a></li>				
+                                    <li class="active grid nav-item nav-link"><a class="color5" href="/regionadmprofile">Manager Account</a></li>
+                                </ul>
+                                <ul class="col-md-2 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color6" ng-click="logout()">Logout</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </nav>
+            </div>
+        <!--=-------
+        profile
+------------>
+        <div class = "container" ng-controller = "admstoreinfoController">
+			<div class = "col-md-8 col-md-offset-2 profile-show">
+			    <div class="section-title text-center center">
+                    <div class = "tabletitle"><h2>Store Infomation</h2></div>
+                </div>
+				<form class="form-horizontal" name = "storeInfo">
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Store ID:</span>
+                        <div class="col-sm-9">
+                            <p>{{curstore.store_ID}}</p>
+                        </div>
+                    </div>
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Store Name:</span>
+                        <div class="col-sm-9">
+                            <input ng-model="newname" type= "text" class="form-control" />
+                        </div>
+                    </div>
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Store Address:</span>
+                        <div class="col-sm-9">
+							<input ng-model="newaddress" type= "text" class="form-control" />
+                        </div>
+                    </div>
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">region ID:</span>
+                        <div class="col-sm-9">
+                            <p>{{curstore.region_ID}}</p>
+                        </div>
+                    </div>
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Region Name:</span>
+                        <div class="col-sm-9">
+							<p>{{curstore.region_name}}</p>
+                        </div>
+                    </div>
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Store Manager Name:</span>
+                        <div class="col-sm-9">
+                            <input ng-model="newmagname" type= "text" class="form-control" />
+                        </div>
+                    </div>
+					<div class="col-md-9 col-md-offset-3" ng-show = "postMsg.Failed">
+							<div class="alert alert-danger">{{postMsg.message}}</div>
+					</div>
+					<div class="form-group">
+                        <div class="col-md-3, col-md-offset-9 profile-btn-panel">
+                            <button type="submit" value="Save" class="btn btn-default" ng-click = "saveinfo()">Save</button>
+							<button value="delete" class="btn btn-default" ng-click = "removestore(curstore.region_ID,curstore.store_ID)">Delete</button>
+                        </div>
+                    </div>
+				</form>
+			</div>
+		</div>
+        <!------------------
+        footer
+     -------------------->
+                <div class="container">
+                    <div class="footer_bottom">
+                        <div class="copy">
+                            <p>Copyright © 2018 Buy_shop. Pitt IS 2710 All Rights Reserved.</p>
+                        </div>
+                    </div>
+                </div>
+    </body>
+</html>

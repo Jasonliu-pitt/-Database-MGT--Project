@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>r_m_Profile</title>
+        <link rel="stylesheet" type="text/css"  href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css">
+        <link rel="stylesheet" type="text/css"  href="stylesheets/style.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+	</head>
+	<script>
+		admprofileModule = angular.module('admprofile',[]);
+		admprofileModule.controller('admprofileController',function($scope,$http){
+			
+			// find the store
+			if (!sessionStorage.getItem('admid')){
+				alert("Administrator status expired, Please login");
+				location.href = '/admlogin';
+			}else{
+				var url = 'administrator/findregionadmbyid/' + sessionStorage.getItem('admid');
+				$http.get(url).then(function (response){
+					$scope.postMsg = response.data;
+					if(!$scope.postMsg.Failed){
+					 	$scope.regionadm = response.data.user;
+					}
+				var url = '/administrator/findregioninfo/'+ sessionStorage.getItem('admid');
+				$http.get(url).then(function (response){
+					$scope.regionid = response.data.regioninfo.region_ID;
+					$scope.regionName = response.data.regioninfo.region_name;
+				})
+			}, function (response){
+				$scope.postMsg = { 'Failed': true, 'message': "Error Status: " +  response.statusText};
+			});
+			}
+		})
+		
+		
+		//log out
+		admprofileModule.controller('logoutController',function($scope,$http){
+			$scope.logout= function(){
+				sessionStorage.removeItem('admid');
+				location.href = '/admlogin';
+			}
+		})
+	</script>
+    <body ng-app="admprofile">
+        <!--=-------
+        Navigation 
+        ------------>
+        <div id="nav" class="container-fluid" ng-controller="logoutController">
+            <nav class="navbar navbar-custom">
+                <div class="container">
+					<div>
+						<div class="navbar-header col-md-2 admlogo">
+							<h1><a class="adm-brand" href="/"><span>Buy</span>shop</a></h1>
+						</div>
+						<div>
+                                <ul class="col-md-8 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color1" href="/regionadmhome">Store Manage</a></li>
+									<li class="active grid nav-item nav-link"><a class="color2" href="/regionadmuser">User Manage</a></li>
+                                    <li class="active grid nav-item nav-link"><a class="color3" href="/regionadmchart">Chart</a></li>
+                                    <li class="active grid nav-item nav-link"><a class="color4" href="/regionadmtransaction">Transaction Record</a></li>				
+                                    <li class="active grid nav-item nav-link"><a class="color5" href="/regionadmprofile">Manager Account</a></li>
+                                </ul>
+                                <ul class="col-md-2 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color6" ng-click="logout()">Logout</a></li>
+                                </ul>
+                        </div>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+            </nav>
+        </div>
+        <!--=-------
+        profile
+------------>
+		<div class = "container" ng-controller = "admprofileController">
+			<div class = "col-md-8 col-md-offset-2 profile-show">
+			    <div class="section-title text-center center">
+                    <div class = "tabletitle"><h2>Region manager Information</h2></div>
+                </div>
+				<form class="form-horizontal" name = "profileInfo">
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Region ID:</span>
+                        <div class="col-sm-9">
+                            <h4>{{regionid}}</h4>
+                        </div>
+                    </div>
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Region Name:</span>
+                        <div class="col-sm-9">
+                            <h4>{{regionName}}</h4>
+                        </div>
+                    </div>
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Region Manager ID:</span>
+                        <div class="col-sm-9">
+                            <h4>{{regionadm.region_manager_ID}}</h4>
+                        </div>
+                    </div>
+					<div class="form-group">
+                        <span class="col-sm-3 control-label">Region Manager Name:</span>
+                        <div class="col-sm-9">
+                            <h4>{{regionadm.Name}}</h4>
+                        </div>
+                    </div>
+				</form>
+			</div>
+		</div>
+        <!------------------
+        footer
+     -------------------->
+                <div class="container">
+                    <div class="footer_bottom_manager">
+                        <div class="copy">
+                            <p>Copyright © 2018 Buy_shop. Pitt IS 2710 All Rights Reserved.</p>
+                        </div>
+                    </div>
+                </div>
+    </body>
+</html>

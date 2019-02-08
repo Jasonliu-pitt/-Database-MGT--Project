@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>s_m_homepage</title>
+        <link rel="stylesheet" type="text/css"  href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css">
+        <link rel="stylesheet" type="text/css"  href="stylesheets/style.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script>
+		storeModule = angular.module('storeadm',[]);
+		storeModule.controller('productController',function($scope,$http,$window){
+			if (!sessionStorage.getItem('admid')){
+				alert("Administrator status expired, Please login");
+				location.href = '/admlogin';
+			}else{
+				var url = '/productctrl/getbystoreid/'+sessionStorage.getItem('admid');
+				$http.get(url).then(function (response){
+					$scope.postMsg= response.data;
+					if(!$scope.postMsg.Failed){
+						$scope.products = $scope.postMsg;
+				}
+			})
+		}
+
+		// add the inventory
+		$scope.addinventory= function(productID,storeID,Quantity){
+			var url = '/productctrl/addinventory'
+			var config = {
+					headers : {
+							'Accept': 'application/json'
+							}
+			}
+			var data = {
+				product_ID: productID,
+				store_ID: storeID,
+				quantity: Quantity,
+			}
+			$http.post(url,JSON.stringify(data), config).then(function (response){
+				$scope.postMsg= response.data;
+				if(!$scope.postMsg.Failed){
+					$window.location.reload();
+				}
+			})
+		}		
+		
+		// remove the inventory
+		$scope.removeinventory= function(productID,storeID,Quantity){
+			var url = '/productctrl/removeinventory'
+			var config = {
+					headers : {
+							'Accept': 'application/json'
+							}
+			}
+			var data = {
+				product_ID: productID,
+				store_ID: storeID,
+				quantity: Quantity,
+			}
+			$http.post(url,JSON.stringify(data), config).then(function (response){
+				$scope.postMsg= response.data;
+				if(!$scope.postMsg.Failed){
+					$window.location.reload();
+				}
+			})
+		}
+		
+		
+		//Delete an product
+			$scope.removeproduct= function(productid,storeid){
+				if(confirm("You really want to delete this product?")){
+					var url = '/productctrl/deletebyid/?productid='+productid+'&storeid='+ storeid;
+					$http.get(url).then(function (response){
+						$scope.postMsg= response.data;
+						if(!$scope.postMsg.Failed){
+							url = '/productctrl/getbystoreid/'+sessionStorage.getItem('admid');
+							$http.get(url).then(function (response){
+								$scope.postMsg= response.data;
+								if(!$scope.postMsg.Failed){
+									$scope.products = $scope.postMsg;
+									$window.location.reload();
+								}
+							})
+						}
+					}, function (response){
+						$scope.postMsg = { 'Failed': true, 'message': "Error Status: " +  response.statusText};
+					});
+				}
+			}
+			
+		//Add an product
+			$scope.addproduct= function(){
+				var url = '/productctrl/addproduct'
+				var config = {
+					headers : {
+							'Accept': 'application/json'
+							}
+				}
+				var data = {
+					store_ID:sessionStorage.getItem('admid'),
+					productName:$scope.addproductName,
+					kind: $scope.addkind,
+					size: $scope.addsize,
+					inventory_amount: $scope.addinventory_amount,
+					price: $scope.addprice,
+					img: 'images/img'+$scope.products.length+'.jpg',
+					description: $scope.adddescription
+				}
+				$http.post(url,JSON.stringify(data), config).then(function (response){
+					$scope.postMsg= response.data;
+					if(!$scope.postMsg.Failed){
+						$window.location.reload();
+					}
+				})
+			}
+			
+			$scope.seedetails = function(productID,storeID){
+					var url = '/productctrl/getbyid';
+					var config = {
+						headers : {
+								'Accept': 'application/json'
+								}
+						}
+					var data = {
+						product_ID: productID,
+						store_ID: storeID
+					}
+				$http.post(url,JSON.stringify(data), config).then(function (response){
+					$scope.postMsg= response.data;
+					if(!$scope.postMsg.Failed){
+						sessionStorage.setItem('admproduct',JSON.stringify(response.data));
+						location.href = '/storeadmproductinfo';
+					}
+				}, function (response){
+					$scope.postMsg = { 'Failed': true, 'message': "Error Status: " +  response.statusText};
+				});
+				
+			}
+	})
+	
+		storeModule.controller('logoutController',function($scope,$http){
+			$scope.logout= function(){
+				sessionStorage.removeItem('admid');
+				location.href = '/admlogin';
+			}
+		})
+</script>
+    </head>
+    <body ng-app="storeadm">
+	<!--=-------
+        Top
+    ------------>
+        <div id="nav" class="container-fluid" ng-controller="logoutController">
+            <nav class="navbar navbar-custom">
+                <div class="container">
+					<div>
+						<div class="navbar-header col-md-2 admlogo">
+							<h1><a class="adm-brand" href="/"><span>Buy</span>shop</a></h1>
+						</div>
+						<div>
+                                <ul class="col-md-8 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color1" href="/storehome">Product Manage</a></li>
+                                    <li class="active grid nav-item nav-link"><a class="color2" href="/storeadmtransaction">Transaction Record</a></li>				
+                                    <li class="active grid nav-item nav-link"><a class="color3" href="/storeadmprofile">Manager Account</a></li>
+                                </ul>
+                                <ul class="col-md-2 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color4" ng-click="logout()">Logout</a></li>
+                                </ul>
+                        </div>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+            </nav>
+        </div>
+        <!--=-------
+        table
+------------>
+
+            <div class="col-md-10 col-md-offset-1 column" ng-controller="productController">
+                <div class="storectrl">
+                        <div class="search">
+                                <input type="text" ng-model= "query" name="s" class="textbox" placeholder="key word" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'product name';}">
+                                <input type="submit" value="Search" name="submit">
+								<div id="response"> </div>
+                        </div>
+                        <ul class="sort_nav">
+                                    <li>Sort : </li>
+                                    <li>Based on:</li> 
+                                    <li><select ng-model="sortcol" ng-init= "sortcol = 'product_ID'">
+										   <option value="product_ID">Product ID</option>
+										   <option value="size">Size</option>
+                                           <option value="inventory_amount">Amount</option>
+                                           <option value="price">Price</option>
+                                        </select>
+                                    </li> |
+                                    <li>Order By:</li> 
+                                    <li><select ng-model="sortord">
+                                           <option value="">low-to-high</option>
+                                           <option value="-">high-to-low</option>
+                                        </select>
+                                    </li>
+                                    <div class="clear"></div>	
+                         </ul>
+                         <div class="clearfix"></div>	
+                </div>            
+            <div class="allproducts" align = "center">
+				<div class = "tabletitle"><h2>Product Infomation</h2></div>
+            <table class="table" ng-show = "products.length != 0">
+				<thead>
+					<tr>
+						<th>
+							Product name
+						</th>
+						<th>
+                            Kind
+						</th>
+						<th>
+							Size
+						</th>
+						<th>
+							Inventory amount
+                        </th>
+                        <th>
+							Price
+                        </th>
+                        <th>
+                            Picture
+                        </th>
+                        <th>
+                            Description
+                        </th>
+						<th>
+                            Information Edit
+                        </th>
+                        <th>
+							Inventory Edit
+                        </th>
+                        <th>
+                            Out of stock
+                        </th>
+					</tr>
+				</thead>
+				<tbody ng-repeat="product in products| orderBy:sortord + sortcol | filter:query">
+					<tr>
+						<td>
+							{{product.productName}}
+						</td>
+						<td>
+							{{product.kind}}
+						</td>
+						<td>
+							{{product.size}}
+						</td>
+						<td>
+							{{product.inventory_amount}}
+                        </td>
+                        <td>
+                            {{product.price}}
+                        </td>
+                        <td>
+                            <img ng-src="{{product.img}}" width="100" height="128" />
+                        </td>
+                        <td>
+                            {{product.description}}
+                        </td>
+						<td>
+							<div ng-click="seedetails(product.product_ID,product.store_ID)"><img src="../images/search1.png"></div>
+						</td>
+                        <td>
+                            <a class="btn btn-default btn-xs" ng-click="addinventory(product.product_ID,product.store_ID,amountedit)">add</a>
+                            <input ng-model="amountedit" style="width: 40px;"  type="number" ng-init="amountedit=1"></input>
+                            <a class="btn btn-default btn-xs" ng-click="removeinventory(product.product_ID,product.store_ID,amountedit)">remove</a>
+                        </td>
+                        <td>
+							<div ng-click="removeproduct(product.product_ID,product.store_ID)"><img src="../images/close.png"></div>
+                        </td>
+                    </tr>
+				</tbody>
+            </table>
+			<div class="container noresult" ng-show = "products.length == 0">
+				<h3>No product Left In This Store</h3>
+			</div>
+            </div>
+
+            <div align = "center">
+				<div class = "tabletitle"><h2>Add Product</h2></div>
+                <table class="table">
+                    <tbody >
+                        <tr>
+                                <td>
+                                    <input type="text" placeholder="name" style= "width: 6em" ng-model="addproductName" require />
+                                </td>
+                                <td>
+                                    <input type="text" placeholder="kind" style= "width: 6em" ng-model="addkind" >
+                                </td>
+                                <td>
+                                    <select type="text" ng-init="addsize='xs'" placeholder="size" style= "width: 6em" ng-model="addsize">
+										<option value="xs">xs</option>
+										<option value="s">s</option>
+										<option value="m">m</option>
+										<option value="l">l</option>
+										<option value="xl">xl</option>
+									</select>
+                                </td>
+                                <td>
+                                    <input type="number" placeholder="amount" style= "width: 6em" ng-model="addinventory_amount" require />
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" placeholder="Price" style= "width: 6em" ng-model="addprice" require />
+                                </td>
+                                <td>
+									<form action="{{'/upload/'+products.length}}" enctype="multipart/form-data" method="post">
+										<input type="file" name="upload" multiple="multiple" style= "width: 6em" require />
+										<input type="submit" value="Upload" />
+									</form>
+                                </td>
+                                <td>
+                                    <input type="text" placeholder="Description" style= "width: 6em" ng-model="adddescription">
+                                </td>
+                                <td>
+                                    <button ng-click="addproduct()" type="submit" class="btn btn-default">On shelves</button>
+                                </td>
+                        </tr>
+                    </tbody>
+                </table>
+				<div ng-show = "postMsg.Failed">
+					<div class="alert alert-danger">{{postMsg.message}}</div>
+				</div>
+            </div>
+		</div>
+        
+        <div class="col-md-12 column">
+            <hr/>
+        </div>
+    <!------------------
+        footer
+     -------------------->
+                <div class="footer">
+                    <div class="container">
+                        <div class="footer_bottom">
+                            <div class="copy">
+                                <p>Copyright © 2018 Buy_shop. Pitt IS 2710 All Rights Reserved.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </body>
+</html>

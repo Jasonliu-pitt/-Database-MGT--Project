@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>s_m_homepage</title>
+        <link rel="stylesheet" type="text/css"  href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css">
+        <link rel="stylesheet" type="text/css"  href="stylesheets/style.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script>
+		regionadmModule = angular.module('regionadm',[]);
+		regionadmModule.controller('regionController',function($scope,$http,$window){
+			if (!sessionStorage.getItem('admid')){
+				alert("Administrator status expired, Please login");
+				location.href = '/admlogin';
+			}else{
+				var url = '/administrator/findstorebyregion/'+ sessionStorage.getItem('admid');
+				$http.get(url).then(function (response){
+					$scope.postMsg= response.data;
+					if(!$scope.postMsg.Failed){
+						$scope.stores = $scope.postMsg.stores;
+				}
+			})
+		}
+		
+		//Delete an store
+			$scope.removestore= function(regionid,storeid){
+				if(confirm("You really want to delete this store?")){
+					var url = '/administrator/deletestorebyid/?storeid='+ storeid+'&regionid=' + regionid + '&admid=' + sessionStorage.getItem('admid');
+					$http.get(url).then(function (response){
+						$scope.postMsg= response.data;
+						if(!$scope.postMsg.Failed){
+							url = '/administrator/findstorebyregion/'+ sessionStorage.getItem('admid');
+							$http.get(url).then(function (response){
+								$scope.postMsg= response.data;
+								if(!$scope.postMsg.Failed){
+									$scope.products = $scope.postMsg;
+									$window.location.reload();
+								}
+							})
+						}
+					}, function (response){
+						$scope.postMsg = { 'Failed': true, 'message': "Error Status: " +  response.statusText};
+					});
+				}
+			}
+			
+		//Add an store
+			$scope.addstore= function(){
+				var url = '/administrator/findregioninfo/'+ sessionStorage.getItem('admid');
+				$http.get(url).then(function (response){
+					var regionid = response.data.regioninfo.region_ID;
+					var regionName = response.data.regioninfo.region_name;
+					var url = '/administrator/addstore'
+					var config = {
+					headers : {
+							'Accept': 'application/json'
+							}
+					}
+					var data = {
+					ID: $scope.addstoreid,
+					name:$scope.addname,
+					address: $scope.addaddress,
+					regionid: regionid,
+					regionName: regionName,
+					storeManagerName: $scope.addstoremanagername,
+					password: $scope.addpassword
+					}
+					$http.post(url,JSON.stringify(data), config).then(function (response){
+						$scope.postMsg= response.data;
+						if(!$scope.postMsg.Failed){
+							$window.location.reload();
+						}
+					})
+				})
+			}
+			
+			$scope.seedetails = function(storeID){
+				var url = '/administrator/findstorebystoreid/'+storeID;
+				$http.get(url).then(function (response){
+					$scope.postMsg= response.data;
+					if(!$scope.postMsg.Failed){
+						sessionStorage.setItem('admstore',JSON.stringify(response.data.stores[0]));
+						location.href = '/regionadmstoreinfo';
+					}
+				}, function (response){
+					$scope.postMsg = { 'Failed': true, 'message': "Error Status: " +  response.statusText};
+				});
+				
+			}
+	})
+	
+		regionadmModule.controller('logoutController',function($scope,$http){
+			$scope.logout= function(){
+				sessionStorage.removeItem('admid');
+				location.href = '/admlogin';
+			}
+		})
+</script>
+    </head>
+    <body ng-app="regionadm">
+	<!--=-------
+        Top
+    ------------>
+        <div id="nav" class="container-fluid" ng-controller="logoutController">
+            <nav class="navbar navbar-custom">
+                <div class="container">
+					<div>
+						<div class="navbar-header col-md-2 admlogo">
+							<h1><a class="adm-brand" href="/"><span>Buy</span>shop</a></h1>
+						</div>
+						<div>
+                                <ul class="col-md-8 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color1" href="/regionadmhome">Store Manage</a></li>
+									<li class="active grid nav-item nav-link"><a class="color2" href="/regionadmuser">User Manage</a></li>
+                                    <li class="active grid nav-item nav-link"><a class="color3" href="/regionadmchart">Chart</a></li>
+                                    <li class="active grid nav-item nav-link"><a class="color4" href="/regionadmtransaction">Transaction Record</a></li>				
+                                    <li class="active grid nav-item nav-link"><a class="color5" href="/regionadmprofile">Manager Account</a></li>
+                                </ul>
+                                <ul class="col-md-2 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color6" ng-click="logout()">Logout</a></li>
+                                </ul>
+                        </div>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+            </nav>
+        </div>
+        <!--=-------
+        table
+------------>
+
+            <div class="col-md-10 col-md-offset-1 column" ng-controller="regionController">
+                <div class="storectrl">
+                        <div class="search">
+                                <input type="text" ng-model= "query" name="s" class="textbox" placeholder="key word" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'product name';}">
+                                <input type="submit" value="Search" name="submit">
+								<div id="response"> </div>
+                        </div>
+                        <ul class="sort_nav">
+                                    <li>Sort : </li>
+                                    <li>Based on:</li> 
+                                    <li><select ng-model="sortcol" ng-init= "sortcol = 'store_ID'">
+										   <option value="store_ID">store ID</option>
+										   <option value="region_ID">region ID</option>
+                                           <option value="storeManagerName">Store Manager Name</option>
+                                        </select>
+                                    </li> |
+                                    <li>Order By:</li> 
+                                    <li><select ng-model="sortord">
+                                           <option value="">low-to-high</option>
+                                           <option value="-">high-to-low</option>
+                                        </select>
+                                    </li>
+                                    <div class="clear"></div>	
+                         </ul>
+                         <div class="clearfix"></div>	
+                </div>            
+            <div class="allproducts" align = "center">
+				<div class = "tabletitle"><h2>Store Infomation</h2></div>
+            <table class="table" ng-show = "stores.length != 0">
+				<thead>
+					<tr>
+						<th>
+							Store ID
+						</th>
+						<th>
+                            Store Name
+						</th>
+						<th>
+							Store Adress
+						</th>
+						<th>
+							Region ID
+                        </th>
+						<th>
+							Region Name
+                        </th>
+                        <th>
+							Store Manager Name
+                        </th>
+						<th>
+                            Information Edit
+                        </th>
+                        <th>
+                            delete Store
+                        </th>
+					</tr>
+				</thead>
+				<tbody ng-repeat="store in stores| orderBy:sortord + sortcol | filter:query">
+					<tr>
+						<td>
+							{{store.store_ID}}
+						</td>
+						<td>
+							{{store.Name}}
+						</td>
+						<td>
+							{{store.Address}}
+						</td>
+						<td>
+							{{store.region_ID}}
+                        </td>
+						<td>
+							{{store.region_name}}
+                        </td>
+                        <td>
+                            {{store.storeManagerName}}
+                        </td>
+						<td>
+							<div ng-click="seedetails(store.store_ID)"><img src="../images/search1.png"></div>
+						</td>
+                        <td>
+							<div ng-click="removestore(store.region_ID,store.store_ID)"><img src="../images/close.png"></div>
+                        </td>
+                    </tr>
+				</tbody>
+            </table>
+			<div class="container noresult" ng-show = "stores.length == 0">
+				<h3>No Store Information</h3>
+			</div>
+            </div>
+
+            <div align = "center">
+				<div class = "tabletitle"><h2>Add Store</h2></div>
+                <table class="table">
+                    <tbody >
+                        <tr>
+                                <td>
+                                    <input type="text" placeholder="Store ID" style= "width: 6em" ng-model="addstoreid" require />
+                                </td>
+                                <td>
+                                    <input type="text" placeholder="Store Name" style= "width: 6em" ng-model="addname" >
+                                </td>
+                                <td>
+									<input type="text" placeholder="Store Address" style= "width: 6em" ng-model="addaddress" >
+                                </td>
+                                <td>
+                                    <input type="text" placeholder="Store Manager Name" style= "width: 6em" ng-model="addstoremanagername" require />
+                                </td>
+                                <td>
+                                    <input type="text" placeholder="password" style= "width: 6em" ng-model="addpassword" require />
+                                </td>
+                                <td>
+                                    <button ng-click="addstore()" type="submit" class="btn btn-default">ADD</button>
+                                </td>
+                        </tr>
+                    </tbody>
+                </table>
+				<div ng-show = "postMsg.Failed">
+					<div class="alert alert-danger">{{postMsg.message}}</div>
+				</div>
+            </div>
+		</div>
+        
+        <div class="col-md-12 column">
+            <hr/>
+        </div>
+    <!------------------
+        footer
+     -------------------->
+                <div class="footer">
+                    <div class="container">
+                        <div class="footer_bottom">
+                            <div class="copy">
+                                <p>Copyright © 2018 Buy_shop. Pitt IS 2710 All Rights Reserved.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </body>
+</html>

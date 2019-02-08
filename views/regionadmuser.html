@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>s_m_transaction</title>
+        <link rel="stylesheet" type="text/css"  href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css">
+        <link rel="stylesheet" type="text/css"  href="stylesheets/style.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script>
+		useradmModule = angular.module('useradm',[]);
+		useradmModule.controller('useradmController',function($scope,$http,$window){
+			
+			var url = '/userctrl/Home_Customer';
+			$http.get(url).then(function (response){
+				$scope.postMsg= response.data;
+				if(!$scope.postMsg.Failed){
+					$scope.homeusers = $scope.postMsg;
+				}
+			})
+			
+			url = '/userctrl/Business_Customer';
+			$http.get(url).then(function (response){
+				$scope.postMsg= response.data;
+				if(!$scope.postMsg.Failed){
+					$scope.Businessusers = $scope.postMsg;
+				}
+			})
+			
+			//Delete Homeuser
+			$scope.removehomeuser= function(userid){
+				if(confirm("You really want to delete this account?")){
+					var url = '/userctrl/Home_Customer/deletebyid/' + userid;
+					$http.get(url).then(function (response){
+							$scope.postMsg= response.data;
+							if(!$scope.postMsg.Failed){
+								$scope.homeusers = $scope.postMsg;
+								$window.location.reload();
+							}
+						}, function (response){
+							$scope.postMsg = { 'Failed': true, 'message': "Error Status: " +  response.statusText};
+						});
+				}
+			}
+			
+			//Delete businessuser
+			$scope.removebusinessuser= function(userid){
+				if(confirm("You really want to delete this account?")){
+					var url = '/userctrl/Business_Customer/deletebyid/' + userid;
+					$http.get(url).then(function (response){
+							$scope.postMsg= response.data;
+							if(!$scope.postMsg.Failed){
+								$scope.Businessusers = $scope.postMsg;
+								$window.location.reload();
+							}
+						}, function (response){
+							$scope.postMsg = { 'Failed': true, 'message': "Error Status: " +  response.statusText};
+						});
+				}
+			}
+		})
+		
+		
+		//log out
+		useradmModule.controller('logoutController',function($scope,$http){
+			$scope.logout= function(){
+				sessionStorage.removeItem('admid');
+				location.href = '/admlogin';
+			}
+		})
+</script>
+    </head>
+    <body ng-app="useradm">
+	<!--=-------
+        Top
+    ------------>
+        <div id="nav" class="container-fluid" ng-controller="logoutController">
+            <nav class="navbar navbar-custom">
+                <div class="container">
+					<div>
+						<div class="navbar-header col-md-2 admlogo">
+							<h1><a class="adm-brand" href="/"><span>Buy</span>shop</a></h1>
+						</div>
+						<div>
+                                <ul class="col-md-8 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color1" href="/regionadmhome">Store Manage</a></li>
+									<li class="active grid nav-item nav-link"><a class="color2" href="/regionadmuser">User Manage</a></li>
+                                    <li class="active grid nav-item nav-link"><a class="color3" href="/regionadmchart">Chart</a></li>
+                                    <li class="active grid nav-item nav-link"><a class="color4" href="/regionadmtransaction">Transaction Record</a></li>				
+                                    <li class="active grid nav-item nav-link"><a class="color5" href="/regionadmprofile">Manager Account</a></li>
+                                </ul>
+                                <ul class="col-md-2 nav navbar-nav coloum">
+                                    <li class="active grid nav-item nav-link"><a class="color6" ng-click="logout()">Logout</a></li>
+                                </ul>
+                        </div>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+            </nav>
+        </div>
+        <!--=-------
+        table
+------------>
+
+        <div class="col-md-10 col-md-offset-1 profile-show" ng-controller="useradmController">
+				<div class="section-title text-center center">
+                    <h2>Home User Information</h2>
+                </div>
+                <div class="storectrl">
+                        <div class="search">
+                                <input type="text" ng-model= "Homequery" name="s" class="textbox" placeholder="key word" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'product name';}">
+                                <input type="submit" value="Search" name="submit">
+								<div id="response"> </div>
+                        </div>
+                        <ul class="sort_nav">
+                                    <li>Sort : </li>
+                                    <li>Based on:</li> 
+                                    <li><select ng-model="homesortcol" ng-init= "homesortcol = 'Home_customer_ID'">
+										   <option value="Home_customer_ID">ID</option>
+										   <option value="income">Income</option>
+                                        </select>
+                                    </li> |
+                                    <li>Order By:</li> 
+                                    <li><select ng-model="homesortord">
+                                           <option value="">low-to-high</option>
+                                           <option value="-">high-to-low</option>
+                                        </select>
+                                    </li>
+                                    <div class="clear"></div>	
+                         </ul>
+                         <div class="clearfix"></div>	
+                </div> 
+            <div id="class" align = "center" style="margin: 0cm 0cm 0pt; text-align: left">
+            <table class="table">
+				<thead>
+					<tr>
+						<th>
+							Home Customer ID
+						</th>
+						<th>
+                            Home Customer Name
+						</th>
+						<th>
+                            Address
+                        </th>
+						<th>
+                            marriage Status
+						</th>
+						<th>
+                            Gender
+                        </th>
+                        <th>
+							Age
+                        </th>
+                        <th>
+                            Income
+                        </th>
+                        <th>
+                            Email
+                        </th>
+						<th>
+                            Telephone Number
+                        </th>
+						<th>
+                            Username
+                        </th>
+						<th>
+                            Operation
+                        </th>
+					</tr>
+				</thead>
+				<tbody ng-repeat = "homeuser in homeusers | orderBy:homesortord + homesortcol | filter:Homequery">
+                    <tr>
+                            <td>
+                                {{homeuser.Home_customer_ID}}
+                            </td>
+							<td>
+                                {{homeuser.name}}
+                            </td>
+                            <td>
+                                {{homeuser.address}}
+                            </td>
+                            <td>
+                                {{homeuser.marriage_status}}
+                            </td>
+                            <td>
+                                {{homeuser.gender}}
+                            </td>
+                            <td>
+                                {{homeuser.age}}
+                            </td>
+                            <td>
+                                {{homeuser.income}}
+                            </td>
+							<td>
+                                {{homeuser.email}}
+                            </td>
+							<td>
+                                {{homeuser.tel}}
+                            </td>
+							<td>
+                                {{homeuser.username}}
+                            </td>
+							<td>
+                                <div ng-click="removehomeuser(homeuser.Home_customer_ID)"><img src="../images/close.png"></div>
+                            </td>
+                    </tr>
+				</tbody>
+            </table>
+            </div>
+			<div class="container noresult" ng-show = "homeusers.length == 0">
+				<h3>No Home Customer Information</h3>
+			</div>
+			<div class="section-title text-center center">
+                    <h2>Bussiness User Transactions</h2>
+                </div>
+                <div class="storectrl">
+                        <div class="search">
+                                <input type="text" ng-model= "Bussinessquery" name="s" class="textbox" placeholder="key word" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'product name';}">
+                                <input type="submit" value="Search" name="submit">
+								<div id="response"> </div>
+                        </div>
+                        <ul class="sort_nav">
+                                    <li>Sort : </li>
+                                    <li>Based on:</li> 
+                                    <li><select ng-model="Bussinesssortcol" ng-init= "Bussinesssortcol = 'Business_customer_ID'">
+										   <option value="Business_customer_ID">ID</option>
+										   <option value="annual_income">Annual Income</option>
+                                        </select>
+                                    </li> |
+                                    <li>Order By:</li> 
+                                    <li><select ng-model="Bussinesssortord">
+                                           <option value="">low-to-high</option>
+                                           <option value="-">high-to-low</option>
+                                        </select>
+                                    </li>
+                                    <div class="clear"></div>	
+                         </ul>
+                         <div class="clearfix"></div>	
+                </div> 
+            <div id="class" align = "center" style="margin: 0cm 0cm 0pt; text-align: left">
+            <table class="table">
+				<thead>
+					<tr>
+						<th>
+							Business Customer ID
+						</th>
+						<th>
+                            Business Customer Name
+						</th>
+						<th>
+                            Address
+                        </th>
+						<th>
+                            Business Category
+						</th>
+                        <th>
+                            Annual Income
+                        </th>
+                        <th>
+                            Email
+                        </th>
+						<th>
+                            Telephone Number
+                        </th>
+						<th>
+                            Username
+                        </th>
+						<th>
+                            Operation
+                        </th>
+					</tr>
+				</thead>
+				<tbody ng-repeat = "businessuser in Businessusers | orderBy:Bussinesssortord + Bussinesssortcol| filter:Bussinessquery">
+                    <tr>
+                            <td>
+                                {{businessuser.Business_customer_ID}}
+                            </td>
+							<td>
+                                {{businessuser.name}}
+                            </td>
+                            <td>
+                                {{businessuser.address}}
+                            </td>
+                            <td>
+                                {{businessuser.business_category}}
+                            </td>
+                            <td>
+                                {{businessuser.annual_income}}
+                            </td>
+							<td>
+                                {{businessuser.email}}
+                            </td>
+							<td>
+                                {{businessuser.tel}}
+                            </td>
+							<td>
+                                {{businessuser.username}}
+                            </td>
+							<td>
+                                <div ng-click="removebusinessuser(businessuser.Business_customer_ID)"><img src="../images/close.png"></div>
+                            </td>
+                    </tr>
+				</tbody>
+            </table>
+            </div>
+			<div class="container noresult" ng-show = "Businessusers.length == 0">
+				<h3>No Business Customer Information</h3>
+			</div>
+		</div>
+	</div>
+    <!------------------
+        footer
+     -------------------->
+                <div class="container">
+                    <div class="footer_bottom">
+                        <div class="copy">
+                            <p>Copyright © 2018 Buy_shop. Pitt IS 2710 All Rights Reserved.</p>
+                        </div>
+                    </div>
+                </div>
+    </body>
+</html>

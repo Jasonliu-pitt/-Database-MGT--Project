@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>m_login</title>
+        <link rel="stylesheet" type="text/css"  href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css">
+        <link rel="stylesheet" type="text/css"  href="stylesheets/style.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script>
+		loginModule = angular.module('login',[]);
+		loginModule.controller('loginController',function($scope,$http){
+			$scope.loginpost = function(){
+				if ($scope.admtype == 'Store'){
+					var url = 'administrator/storemag/login';
+				}else{
+					var url = 'administrator/regionmag/login';
+				}
+				
+				
+				var config = {
+						headers : {
+								'Accept': 'application/json'
+								}
+						}
+						
+						
+				var data = {
+					ID: $scope.ID,
+					password: $scope.password
+				}
+				
+				$http.post(url,JSON.stringify(data), config).then(function (response){
+					$scope.postMsg= response.data;
+					if(!$scope.postMsg.Failed){
+						if ($scope.admtype == 'Store'){
+							sessionStorage.setItem('admid', $scope.postMsg.user.store_ID);
+							location.href = '/storehome';
+						}else{
+							sessionStorage.setItem('admid', $scope.postMsg.user.region_manager_ID);
+							location.href = '/regionadmhome';
+						}
+					}
+				}, function (response){
+					$scope.postMsg = { 'Failed': true, 'message': "Error Status: " +  response.statusText};
+				});
+			}
+		})
+</script>
+    </head>
+    <body>
+	<!--=-------
+        Top
+    ------------>
+        <div id="nav" class="container-fluid">
+            <nav class="navbar navbar-custom">
+                <div class="container">
+					<div class="col-md-9">
+						<div class="navbar-header col-md-2 admlogo">
+							<h1><a class="adm-brand" href="/"><span>Buy</span>shop</a></h1>
+						</div>
+						<div class="col-md-6">
+							<a class="admnavbar-text">MANAGER LOGIN</a>
+						</div>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+            </nav>
+        </div>
+        <!--=-------
+        Login
+------------>
+		<div id = "Login" ng-app = "login">
+			<div class="container">
+            <div class = "col-md-8 col-md-offset-2 adm-login" ng-controller = "loginController">
+                <div class="section-title text-center center">
+                    <h2>REGISTERED MANAGERS</h2>
+                    <p>If you have a manager account, please log in.</p>
+                </div>
+                <form class="form-horizontal" ng-submit = "loginpost()">
+                    <div>
+                        <span class="col-sm-3 control-label">Administrator ID<label>*</label></span>
+                        <div class="col-sm-9">
+                            <input ng-model="ID" id="ID" class="form-control" type="text" required name="ID" >
+                        </div>
+                    </div>
+                    <div>
+                        <span class="col-sm-3 control-label">Password<label>*</label></span>
+                        <div class="col-sm-9">
+                            <input ng-model="password" id="pwd" class="form-control" type="password" required name="password">
+                        </div>
+                    </div>
+					<div>
+                        <span class="col-sm-3 control-label">Identity<label>*</label></span>
+                        <div class="col-sm-9">
+                            <select id="type" class="form-control" ng-model="admtype" required name="type">
+                                <option value="Store">Store Manager</option>
+                                <option value="Region">Region Manager</option>
+                            </select>
+                        </div>
+                    </div>
+					<div>
+						<div class="col-sm-9 col-sm-offset-3 text-center" ng-show = "postMsg.Failed">
+							<div class="alert alert-danger">{{postMsg.message}}</div>
+						</div>
+					</div>
+                    <div>
+                        <div class="col-sm-3, col-sm-offset-9">
+                            <button type="reset" value="Reset" class="btn manage_login_button">Reset</button>
+                            <button type="submit" value="Login" class="btn manage_login_button">Login</button>
+                        </div>
+                    </div>
+                </form>
+            </div>	
+            <div class="clearfix"> </div>
+			</div>
+        </div>
+    <!------------------
+        footer
+     -------------------->
+	<div class="container">
+		<div class="footer_bottom">
+			<div class="copy">
+				<p>Copyright © 2018 Buy_shop. Pitt IS 2710 All Rights Reserved.</p>
+			</div>
+		</div>
+	</div>
+    </body>
+</html>
